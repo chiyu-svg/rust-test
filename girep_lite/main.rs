@@ -23,17 +23,26 @@ Life isn't fair, but it's still good." ,
 }
 
 use message::Content;
+use regex::Regex;
 fn main() {
     let Content { content, search_content, search_bound } = Content::new();
     // 保存匹配内容的行号
     let mut tags: Vec<usize> = vec![];
     // 保存匹配内容的附近行
     let mut ctxs: Vec<Vec<(usize, String)>> = vec![];
+    let re = Regex::new(search_content).unwrap();
     for (i, line) in content.lines().enumerate() {
+        let contains_substring = re.find(line);
+        match contains_substring {
+            Some(_) => {
+                tags.push(i);
+                let local_ctx = Vec::with_capacity(2*search_bound + 1); //节省扩容时的性能
+                ctxs.push(local_ctx);
+            },
+            None => {}
+        }
         if line.contains(search_content) {
-            tags.push(i);
-            let local_ctx = Vec::with_capacity(2*search_bound + 1); //节省扩容时的性能
-            ctxs.push(local_ctx);
+           
         }
     }
     if tags.is_empty() {
@@ -61,4 +70,5 @@ fn main() {
 /// 1. 迭代器.enumerate()
 /// 2. 字符串.content()
 /// 3. usize.saturating_sub() 做减法防止越界 0 一下
+/// 3  Regex 没有集成在语言中
 fn lenarn_note(){}
