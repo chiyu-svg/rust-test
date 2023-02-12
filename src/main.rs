@@ -1,10 +1,10 @@
 mod message {
-    pub struct Content {
-        pub content: &'static str,
-        pub search_content: &'static str,
+    pub struct Content<'a> {
+        pub content: &'a str,
+        pub search_content: &'a str,
         pub search_bound: usize
     }
-    impl Content {
+    impl<'a> Content<'a> {
         pub fn new() -> Self {
             Content { 
                 content: "/   
@@ -24,8 +24,13 @@ Life isn't fair, but it's still good." ,
 
 use message::Content;
 use regex::Regex;
+use clap::{App, Arg};
 fn main() {
-    let Content { content, search_content, search_bound } = Content::new();
+    let args = App::new("grep-lite").version("0.1").arg(Arg::with_name("pattern").takes_value(true).required(true)).get_matches();
+    let pattern = args.value_of("pattern").unwrap();
+    let mut content = Content::new();
+    content.search_content = pattern;
+    let Content {search_bound, search_content, content} = content;
     // 保存匹配内容的行号
     let mut tags: Vec<usize> = vec![];
     // 保存匹配内容的附近行
