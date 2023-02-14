@@ -1,4 +1,9 @@
 use rand::prelude::*;
+#[derive(Debug)]
+enum FileState {
+    Open,
+    Close
+}
 
 // 模拟触发异常
 fn one_in(denominator: u32) -> bool {
@@ -9,13 +14,15 @@ static mut ERROR: i32 = 0;
 #[derive(Debug)]
 struct File {
     name: String,
-    data: Vec<u8>
+    data: Vec<u8>,
+    state: FileState
 }
 impl File {
     fn new(name: &str) -> Self {
         File {
             name: String::from(name),
-            data: vec![]
+            data: vec![],
+            state: FileState::Close
         }
     }
     fn new_with_data(name: &str, data: &Vec<u8>) -> Self {
@@ -23,18 +30,20 @@ impl File {
         f.data = data.clone();
         f
     }
-    fn open(self) -> Result<File, String> {
+    fn open(mut self) -> Result<File, String> {
         if one_in(100) {
             let err_msg = String::from("Permission denied");
             return Err(err_msg)
         }
+        self.state = FileState::Open;
         Ok(self)
     }
-    fn close(self) -> Result<File, String> {
+    fn close(mut self) -> Result<File, String> {
         if one_in(100) {
             let err_msg = String::from("Interrupted by signal!");
             return Err(err_msg)
         };
+        self.state = FileState::Close;
         Ok(self)
     }
     fn read(&self, save_to: &mut Vec<u8>) -> Result<usize, String> {
