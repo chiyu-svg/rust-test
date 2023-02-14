@@ -1,3 +1,5 @@
+use std::fmt::{self, Display};
+
 use rand::prelude::*;
 #[derive(Debug)]
 enum FileState {
@@ -16,6 +18,19 @@ struct File {
     name: String,
     data: Vec<u8>,
     state: FileState
+}
+impl Display for FileState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            FileState::Close => write!(f, "CLOSE"),
+            FileState::Open => write!(f, "OPEN")
+        }
+    }
+}
+impl Display for File {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "<{} ({})>", self.name, self.state)
+    }
 }
 impl File {
     fn new(name: &str) -> Self {
@@ -73,6 +88,6 @@ fn main() {
         }
     }
     let txt = String::from_utf8_lossy(&buffer);
-    println!("{:?}", f3);
+    println!("{}", f3);
     println!("{} is {} bytes", txt, read_length);
 }
