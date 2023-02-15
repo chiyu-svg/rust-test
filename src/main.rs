@@ -1,45 +1,62 @@
 #[derive(Debug)]
-struct CubeSat {
-    id: u64,
-    mailbox: Mailbox
+struct Satellite {
+    set_id: u64
+}
+impl Satellite {
+    fn receive(&self, mailbox: &mut Mailbox) -> Option<Message> {
+        mailbox.receive(self)
+    }
 }
 #[derive(Debug)]
-enum StatusMessage {
-    Ok
+struct GroundStation;
+impl GroundStation {
+    fn post(&self, mailbox: &mut Mailbox, msg: Message) {
+        mailbox.post(msg);
+    }
+}
+#[derive(Debug)]
+struct Message {
+    to: u64,
+    message: String
 }
 #[derive(Debug)]
 struct Mailbox {
-    messages: Vec<Message>
+    content: Vec<Message>
 }
-
-type Message = String;
-
-struct GroundStation;
-
-impl GroundStation {
-    fn send(&self, to: &mut CubeSat, msg: Message) {
-        to.mailbox.messages.push(msg);
+impl Mailbox {
+    fn new() -> Self {
+        Mailbox { content: vec![] }
     }
-}
-impl CubeSat {
-    fn recv(&mut self) -> Option<Message> {
-        self.mailbox.messages.pop()
-    }
-}
-
-
-fn main() {
-    let base = GroundStation {};
-    let mut sat_a = CubeSat {
-        id: 0_u64,
-        mailbox: Mailbox {
-            messages: vec![]
+    fn receive(&mut self, to: &Satellite) -> Option<Message> {
+        for i in 0..self.content.len() {
+            if self.content[i].to == to.set_id {
+                let msg = self.content.remove(i);
+                return Some(msg)
+            }
         }
-    };
-    println!("t0: {:?}", sat_a);
-    base.send(&mut sat_a, String::from("hello world"));
-    println!("t1: {:?}", sat_a);
-    let msg = sat_a.recv();
-    println!("t2: {:?}", sat_a);
-    println!("msg: {:?}", msg);
+        None
+    }
+    fn post(&mut self, msg: Message) {
+        self.content.push(msg);
+    }
+}
+fn main() {
+    let groundStation = GroundStation;
+    let mut mailbox = Mailbox::new();
+    for satellite in fatch_satellit() {
+        groundStation.post(&mut mailbox, Message { to: satellite, message:format!("hello _ {}", satellite)});
+    } 
+    for satellite in fatch_satellit() {
+        let satl = Satellite { set_id: satellite };
+        match satl.receive(&mut mailbox) {
+            Some(val) => {
+                println!("{:?}", val)
+            },
+            None => {}
+        }
+    }
+}
+/// 模拟存储卫星库
+fn fatch_satellit() -> Vec<u64> {
+    vec![1,2,3,4]
 }
