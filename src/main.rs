@@ -1,21 +1,20 @@
-use std::mem::size_of;
+/// 输出外部来源字符串
+use std::borrow::Cow;
+use std::ffi::CStr;
+use std::os::raw::c_char;
 
-static  B: [u8; 3] = [101, 22, 34];
-static  C: [u8; 5] = [33, 44, 54, 66, 20];
+static  B: [u8; 10] = [99, 97, 114, 114, 121, 116, 111, 119, 101, 108];
+static  C: [u8; 11] = [116, 104, 97, 110, 107, 115, 102, 105, 115, 104, 0];
 
 fn main(){
     let a: usize = 42;
-    let b = &B;
-    let c = Box::new(C);
-    
-    println!("location: {:p}", &a);
-    println!("szie: {:?} bytes", size_of::<usize>());
-
-    println!("location: {:p}", &b);
-    println!("size: {:?} bytes", size_of::<&[u8; 3]>());  // 引用占用 8 个字节 其实是与带宽有关
-
-    println!("location: {:p}", &c);
-    println!("size: {:?} bytes", size_of::<Box<[u8]>>()); // 智能指针
-
-    println!("size: {:?} bytes", size_of::<[u8; 10]>()); // 10 个数组的大小
+    let b: String;
+    let c: Cow<str>;
+    unsafe {
+        let b_ptr = &B as *const u8 as *mut u8; // const 原始猜测是原始指针
+        b = String::from_raw_parts(b_ptr, 10, 10);
+        let c_ptr = &C as *const u8 as *const c_char;
+        c = CStr::from_ptr(c_ptr).to_string_lossy();
+    }
+    println!("a: {}, b: {}, c: {}", a, b, c);
 }

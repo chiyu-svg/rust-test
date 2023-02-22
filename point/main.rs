@@ -15,7 +15,7 @@ fn main(){
     println!("size: {:?} bytes", size_of::<&[u8; 3]>());  // 引用占用 8 个字节 其实是与带宽有关
 
     println!("location: {:p}", &c);
-    println!("size: {:?} bytes", size_of::<Box<[u8]>>()); // 智能指针
+    println!("size: {:?} bytes", size_of::<Box<[u8]>>()); // 智能指针   
 
     println!("size: {:?} bytes", size_of::<[u8; 10]>()); // 10 个数组的大小
 }
