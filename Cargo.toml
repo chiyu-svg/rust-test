@@ -7,5 +7,7 @@ edition = "2021"
 
 [dependencies]
 clap = "2"
+piston2d-graphics = "0.39"
+piston_window = "0.117"
 rand = "0.8"
 regex = "1.7.1"
