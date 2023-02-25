@@ -6,8 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bincode = "1"
 clap = "2"
 piston2d-graphics = "0.39"
 piston_window = "0.117"
 rand = "0.8"
 regex = "1.7.1"
+serde = "1"
+serde_cbor = "0.8"
+serde_derive = "1"
+serde_json = "1"

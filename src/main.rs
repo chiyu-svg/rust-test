@@ -1,140 +1,32 @@
-use std::alloc::{GlobalAlloc, System, Layout}; 
-// alloc 提供了分配内存的工具
-use std::time::Instant;
-use piston_window::*;
+use bincode::serialize as to_bincode;
+use serde_cbor::to_vec as to_cbor;
+use serde_json::to_string as to_json;
+use serde_derive::{Serialize};
 
-use graphics::math::{Vec2d, add, mul_scalar};
-use rand::prelude::*;
-
-#[global_allocator]
-static ALLOCATOR: ReportingAllocator = ReportingAllocator;
-
-struct ReportingAllocator;
-
-unsafe impl  GlobalAlloc for ReportingAllocator {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        let start = Instant::now();
-        let ptr = System.alloc(layout); // 借用系统的内存分配
-        let end = Instant::now();
-        let time_taken = end - start;
-        let bytes_requested = layout.size();
-        eprintln!("{}\t{}", bytes_requested, time_taken.as_nanos());
-        ptr
-    }
-    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        System.dealloc(ptr, layout)
-    }
-}
-
-// 背景框
-struct World {
-    current_turn: u64,
-    particles: Vec<Box<Particle>>,
-    height: f64,
-    width: f64,
-    rng: ThreadRng
-}
-// 粒子对象
-struct Particle {
-    height: f64,
-    width: f64,
-    position: Vec2d<f64>,
-    velocity: Vec2d<f64>,
-    acceleration: Vec2d<f64>,
-    color: [f32; 4]
-}
-
-impl Particle {
-    fn new(world: &World) -> Self {
-        let mut rng = thread_rng();
-        let x = rng.gen_range(0.0..=world.width); // 背景的随机宽度
-        let y = world.height;
-        let x_velocity = 0.0;
-        let y_velocity = rng.gen_range(-2.0..0.0);
-        let x_acceleration = 0.0;
-        let y_acceleration = rng.gen_range(0.0..0.15);
-
-        Particle {
-            height: 4.0,
-            width: 4.0,
-            position: [x,y].into(),
-            velocity: [x_velocity, y_velocity].into(),
-            acceleration: [x_acceleration, y_acceleration].into(),
-            color: [1.0, 1.0, 1.0, 0.99]
-        }
-    }
-    fn update(&mut self) {
-        self.velocity = add(self.velocity, self.acceleration);
-        self.position = add(self.position, self.velocity);
-        self.acceleration = mul_scalar(self.acceleration, 0.7);
-        self.color[3] *= 0.995;
-    }
-}
-
-impl World {
-    fn new(width: f64, height: f64) -> World {
-        World {
-            current_turn: 0,
-            particles: Vec::<Box<Particle>>::new(),
-            height,
-            width,
-            rng: thread_rng()
-        }
-    }
-    fn add_shapes(&mut self, n: i32) {
-        for _ in 0..n.abs() {
-            let particle = Particle::new(self); // 创建一个图形
-            let boxed_particle = Box::new(particle); // 增加一次内存分配
-            self.particles.push(boxed_particle);
-        }
-    }
-    fn remove_shapes(&mut self, n: i32) {
-        for _ in 0..n.abs() {
-            let mut to_delete = None;
-            let particle_iter =  self.particles.iter().enumerate();
-            for (i, particle) in particle_iter {
-                if particle.color[3] < 0.02 { // 如果小于0.02 就要删除了
-                    to_delete = Some(i);
-                }
-                break;
-            }
-            if let Some(i) = to_delete {
-                self.particles.remove(i);
-            } else {
-                self.particles.remove(0);
-            }
-        }
-    }
-    fn update(&mut self) {
-        let n = self.rng.gen_range(-3..=3);
-        if n > 0 {
-            self.add_shapes(n);
-        } else {
-            self.remove_shapes(n);
-        }
-        self.particles.shrink_to_fit();
-        for shape in &mut self.particles {
-            shape.update();
-        }
-        self.current_turn += 1;
-    }
+#[derive(Serialize)]
+struct City {
+    name: String,
+    population: usize,
+    latitude: f64,
+    longitude: f64
 }
 
 fn main() {
-    let (width, height) = (1280.0, 960.0);
-    let mut window: PistonWindow = WindowSettings::new("particles", [width, height]).exit_on_esc(true).build().expect("Colud not create a window.");
-    let mut world = World::new(width, height);
-    world.add_shapes(1000);
-    while let Some(event) = window.next() {
-        world.update();
-        window.draw_2d(&event, |ctx, renderer, _device| {
-            clear([0.15, 0.17, 0.17, 0.9], renderer);
-            for s in &mut world.particles {
-                let size = [s.position[0], s.position[1], s.width, s.height];
-                rectangle(s.color, size, ctx.transform, renderer)
-            }
-        });
-    }
+    let calabar = City {
+        name: String::from("Calabar"),
+        population: 470_000,
+        latitude: 4.95,
+        longitude: 8.33
+    };
+    let as_json = to_json(&calabar).unwrap();
+    println!("json:\n{}\n", &as_json);
+    let as_cbor = to_cbor(&calabar).unwrap();
+    println!("cbor:\n{:?}\n", &as_cbor);
+    let as_bincode = to_bincode(&calabar).unwrap();
+    println!("bincode: \n{:?}\n", &as_bincode);
 
+    println!("json (as UTF-8): \n{}\n", String::from_utf8_lossy(as_json.as_bytes()));
+
+    println!("cbor: \n{:?}\n", String::from_utf8_lossy(&as_cbor));
+    println!("cbor: \n{:?}\n", String::from_utf8_lossy(&as_bincode));
 }
-
