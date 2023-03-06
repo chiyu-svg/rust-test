@@ -5,6 +5,7 @@ use std::env;
 const BYTES_PER_LINE: usize = 16;
 
 fn main(){ 
+    let ad = "hello world";
     let arg1 = env::args().nth(1);
     let fname = arg1.expect("usage: process filename");
     let mut f = File::open(&fname).expect("Unable to open file");
