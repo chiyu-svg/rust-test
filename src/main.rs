@@ -20,8 +20,21 @@ impl fmt::Display for UpsteamError {
 
 impl error::Error for UpsteamError {}
 
+impl From<io::Error> for UpsteamError {
+    fn from(error: io::Error) -> Self {
+        UpsteamError::IO(error)
+    }
+}
+
+impl From<net::AddrParseError> for UpsteamError {
+    fn from(error: net::AddrParseError) -> Self {
+        UpsteamError::Parsing(error)
+    }
+}
+
+
 fn main() -> Result<(), UpsteamError> {
-    let _f = File::open("invisible.txt").map_err(UpsteamError::IO)?;
-    let _localhost = "::1".parse::<Ipv6Addr>().map_err(UpsteamError::Parsing)?;
+    let _f = File::open("invisible.txt")?;
+    let _localhost = "::1".parse::<Ipv6Addr>()?;
     Ok(())
 }
