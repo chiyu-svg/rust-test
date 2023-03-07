@@ -7,7 +7,6 @@ use trust_dns::rr::domain::Name;
 use trust_dns::rr::record_type::RecordType;
 use trust_dns::serialize::binary::*;
 
-
 fn main() {
     // 创建一个 app
     let app = App::new("resolve")
@@ -20,7 +19,7 @@ fn main() {
     let domain_name_raw = app.value_of("domain-name").unwrap();
     let domain_name = Name::from_ascii(domain_name_raw).unwrap();
     let dns_server_raw = app.value_of("dns-server").unwrap();
-    let dns_server: SocketAddr = format!("{}: 53", dns_server_raw).parse().expect("invalid address");
+    let dns_server: SocketAddr = format!("{}:53", dns_server_raw).parse().expect("invalid address");
 
     // 请求和响应数据缓存
     let mut request_as_bytes: Vec<u8> = Vec::with_capacity(512);
@@ -40,7 +39,7 @@ fn main() {
     msg.emit(&mut encoder).unwrap();
 
     // 创造 Socket
-    let localhost = UdpSocket::bind("0.0.0.0.0").expect("cannot bind to local socket");
+    let localhost = UdpSocket::bind("0.0.0.0:0").expect("cannot bind to local socket");
     let timeout = Duration::from_secs(3);
     localhost.set_read_timeout(Some(timeout)).unwrap();     // 不明白为什么要接受一个 Option
     localhost.set_nonblocking(false).unwrap();
