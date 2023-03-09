@@ -2431,6 +2431,7 @@ name = "rust-test"
 version = "0.1.0"
 dependencies = [
  "bincode",
+ "chrono",
  "clap",
  "piston2d-graphics",
  "piston_window",
