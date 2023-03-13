@@ -1,0 +1,13 @@
+[human]
+langle = "zh-cn, en-us"
+wisdom = 120
+strength = 50
+civilization = 100
+
+[plant]
+life_blood = "to sun"
+life = "forest"
+
+[animal]
+body = "stong"
+eat = "always"

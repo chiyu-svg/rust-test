@@ -1,0 +1,7 @@
+[input]
+xml_file = "../data/sales.xml"
+json_file = "../data/.json"
+
+[postgresql]
+database = "Rust2018"
+
